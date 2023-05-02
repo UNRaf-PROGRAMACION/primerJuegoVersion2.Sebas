@@ -1,6 +1,7 @@
 import { SHAPES } from "../../utils.js";
 const {TRIANGLE, SQUARE, DIAMOND} = SHAPES
 export default class Game extends Phaser.Scene {
+  time;
   score;
   constructor() {
     super("game");
@@ -30,6 +31,9 @@ export default class Game extends Phaser.Scene {
     //add static platforms
     let platforms = this.physics.add.staticGroup();
     platforms.create(400, 568, "platform").setScale(2).refreshBody();
+    platforms.create(150, 400, "platform").setScale(0.4).refreshBody();
+    platforms.create(700, 200, "platform").setScale(0.4).refreshBody();
+    platforms.create(425, 320, "platform").setScale(0.2).refreshBody();
 
     //add shapes
     this.shapesGroup = this.physics.add.group();
@@ -76,6 +80,8 @@ export default class Game extends Phaser.Scene {
       
     });
 
+    
+
   }
 
   update() {
@@ -119,4 +125,57 @@ export default class Game extends Phaser.Scene {
 
   }
 
+  //add timer
+  // function(){
+
+  //   let = me = this;
+
+  //   me.startTime = new Date();
+  //   me.totalTime = 120;
+  //   me.timeElapsed = 0;
+
+  //   me.createTimer();
+
+  //   me.gameTimer = game.time.events.loop(100, function(){
+  //     me.updateTimer();
+  //   });
+  // }
+
+  // //Timer display
+  // function1(){
+
+  //   let me = this;
+
+  //   me.timeLabel = me.game.add.text(me.game.world.centerX, 100, "00:00", {font: "100px Arial", fill: "#FFFFFF"});
+  //   me.timeLabel.anchor.setTo(0.5, 0);
+  //   me.timeLabel.align = "center";
+  // };
+
+  // //Update timer
+  // function2(){
+
+  //   const me = this;
+
+  //   let currentTime = new Date();
+  //   let timeDifference = me.startTime.getTime() - currentTime.getTime();
+
+  //   //Time elapsed in seconds
+  //   me.timeElapsed = Math.abs(timeDifference / 1000);
+
+  //   //Time remaining in seconds
+  //   let timeRemaining = me.totalTime - me.timeElapsed;
+
+  //   //Convert seconds into minutes and seconds
+  //   let minutes = Math.floor(timeRemaining / 60);
+  //   let seconds = Math.floor(timeRemaining) - (60 * minutes);
+
+  //   //Display minutes, add a 0 to the start if less than 10
+  //   let result = (minutes < 10) ? "0" + minutes : minutes;
+
+  //   //Display seconds, add a 0 to the start if less than 10
+  //   result += (seconds < 10) ? ":0" + seconds : ":" + seconds;
+
+  //   me.timeLabel.text = result;
+
+  // }
 }
