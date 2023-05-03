@@ -1,28 +1,25 @@
 import { SHAPES } from "../../utils.js";
-const {TRIANGLE, SQUARE, DIAMOND} = SHAPES
+const { TRIANGLE, SQUARE, DIAMOND, BOMB } = SHAPES;
 export default class Game extends Phaser.Scene {
-  time;
   score;
+  gameOver;
   constructor() {
-    super("game");
+    super("Game");
   }
 
   init() {
+    this.gameOver = false;
+    
+
     this.shapesRecolected = {
-      [TRIANGLE]: { count: 0, score: 10},
-      [SQUARE]: { count: 0, score: 20},
-      [DIAMOND]: { count: 0, score: 30},
+      [TRIANGLE]: { count: 0, score: 10 },
+      [SQUARE]: { count: 0, score: 20 },
+      [DIAMOND]: { count: 0, score: 30 },
+      [BOMB]: { count: 0, score: -50 },
     };
   }
 
-  preload() {
-    this.load.image("sky", "./assets/image/sky.png");
-    this.load.image("platform", "./assets/image/platform.png");
-    this.load.image("ninja", "./assets/image/ninja.png");
-    this.load.image(SQUARE, "./assets/image/square.png");
-    this.load.image(DIAMOND, "./assets/image/diamond.png");
-    this.load.image(TRIANGLE, "./assets/image/triangle.png");
-  }
+  
 
   create() {
     //add background
@@ -42,7 +39,7 @@ export default class Game extends Phaser.Scene {
     // this.shapesGroup.create(300, 0, "triangle");
     //create event to add shapes
     this.time.addEvent({
-      delay: 1500,
+      delay: 500,
       callback: this.addShape,
       callbackScope: this,
       loop: true,
@@ -57,7 +54,7 @@ export default class Game extends Phaser.Scene {
 
     //add collider between player and platforms
     //add collider between player and shapes
-    
+
     this.physics.add.collider(this.player, platforms);
     this.physics.add.collider(this.player, this.shapesGroup);
     this.physics.add.collider(platforms, this.shapesGroup);
@@ -71,20 +68,51 @@ export default class Game extends Phaser.Scene {
       this
     );
 
+    //add overlap between shapes and platforms
+    // this.physics.add.overlap(
+    //   this.shapesGroup,
+    //   this.platforms,
+    //   this
+    // )
+
     //add score on screen
     this.score = 0;
     this.scoreText = this.add.text(20, 20, "Score:" + this.score, {
       fontSize: "32px",
       fontStyle: "bold",
       fill: "#FFFFFF",
-      
     });
 
-    
+    //add timer
+    this.time.addEvent({
+      delay: 1000,
+      callback: this.onSecond,
+      callbackScope: this,
+      loop: true,
+    });
+
+    //add timer on screen
+    this.timer = 60;
+    this.timerText = this.add.text(750, 20, this.timer, {
+      fontSize: "32px",
+      fontStyle: "bold",
+      fill: "#FFFFFF",
+    });
 
   }
 
   update() {
+    // if (this.gameOver) {
+    //   this.physics.pause();
+    //   this.restartSceneWithKeyR();
+    // }
+    if (this.score >= 200){
+      this.scene.start("Win");
+    }
+    if (this.gameOver){
+      this.scene.start("GameOver");
+    }
+
     //Move player
     if (this.cursors.left.isDown) {
       this.player.setVelocityX(-250);
@@ -104,78 +132,31 @@ export default class Game extends Phaser.Scene {
 
   addShape() {
     //get random shape
-    const randomShape = Phaser.Math.RND.pick([DIAMOND, SQUARE, TRIANGLE]);
+    const randomShape = Phaser.Math.RND.pick([DIAMOND, SQUARE, TRIANGLE, BOMB]);
 
     //get random position x
     const randomX = Phaser.Math.RND.between(0, 800);
 
     //get shape to screen
-    this.shapesGroup.create(randomX, 0, randomShape);
+    this.shapesGroup.create(randomX, 0, randomShape).setCircle(25, 7, 7) .setBounce(0.75, 0.50);
   }
 
   collectShape(player, shape) {
     //remove shape from screen
     shape.disableBody(true, true);
-    
+
     const shapeName = shape.texture.key;
     this.shapesRecolected[shapeName].count++;
 
     this.score += this.shapesRecolected[shapeName].score;
     this.scoreText.setText(`score: ${this.score.toString()}`);
-
   }
 
-  //add timer
-  // function(){
-
-  //   let = me = this;
-
-  //   me.startTime = new Date();
-  //   me.totalTime = 120;
-  //   me.timeElapsed = 0;
-
-  //   me.createTimer();
-
-  //   me.gameTimer = game.time.events.loop(100, function(){
-  //     me.updateTimer();
-  //   });
-  // }
-
-  // //Timer display
-  // function1(){
-
-  //   let me = this;
-
-  //   me.timeLabel = me.game.add.text(me.game.world.centerX, 100, "00:00", {font: "100px Arial", fill: "#FFFFFF"});
-  //   me.timeLabel.anchor.setTo(0.5, 0);
-  //   me.timeLabel.align = "center";
-  // };
-
-  // //Update timer
-  // function2(){
-
-  //   const me = this;
-
-  //   let currentTime = new Date();
-  //   let timeDifference = me.startTime.getTime() - currentTime.getTime();
-
-  //   //Time elapsed in seconds
-  //   me.timeElapsed = Math.abs(timeDifference / 1000);
-
-  //   //Time remaining in seconds
-  //   let timeRemaining = me.totalTime - me.timeElapsed;
-
-  //   //Convert seconds into minutes and seconds
-  //   let minutes = Math.floor(timeRemaining / 60);
-  //   let seconds = Math.floor(timeRemaining) - (60 * minutes);
-
-  //   //Display minutes, add a 0 to the start if less than 10
-  //   let result = (minutes < 10) ? "0" + minutes : minutes;
-
-  //   //Display seconds, add a 0 to the start if less than 10
-  //   result += (seconds < 10) ? ":0" + seconds : ":" + seconds;
-
-  //   me.timeLabel.text = result;
-
-  // }
+  onSecond(){
+    this.timer--;
+    this.timerText.setText(this.timer);
+    if(this.timer <= 0){
+      this.gameOver = true;
+    }
+  }
 }
